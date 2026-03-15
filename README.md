@@ -74,7 +74,7 @@ Designed to mirror real production workflows used at studios like DreamWorks, Pi
 No build step needed — it's plain HTML, CSS, and JavaScript.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/shot-planner.git
+git clone https://github.com/richards020/Shot-Planner.git
 cd shot-planner
 
 # Open directly in browser (macOS)
