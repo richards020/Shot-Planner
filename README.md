@@ -100,4 +100,10 @@ The tool mirrors concepts from real previsualization workflows: scene hierarchy,
 
 ## License
 
-MIT
+© 2026 Richard Saucedo. All rights reserved.
+
+This project and its source code are the exclusive intellectual property of Richard Saucedo. No part of this project may be copied, modified, distributed, reproduced, or used for personal, professional, commercial, or business purposes without the express written permission of the author.
+
+Viewing this repository for reference or inspiration is permitted, but direct use, redistribution, or derivative works are strictly prohibited without prior written consent.
+
+For licensing inquiries contact: richardsaucedo2007@gmail.com
