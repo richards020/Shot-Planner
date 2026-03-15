@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shot Planner — 3D Previsualization Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+    <span class="app-name">Shot Planner</span>
+    <button class="tb-btn mode-active" id="btn-character" onclick="setMode('character')" title="Place Actor (A)">Actor</button>
+    <button class="tb-btn" id="btn-prop" onclick="setMode('prop')" title="Place Prop">Prop</button>
+    <button class="tb-btn" id="btn-camera" onclick="setMode('camera')" title="Place Camera (C)">Camera</button>
+    <button class="tb-btn" id="btn-light" onclick="setMode('light')" title="Place Light (L)">Light</button>
+    <button class="tb-btn" id="btn-wall" onclick="setMode('wall')" title="Draw Wall">Wall</button>
+    <button class="tb-btn" id="btn-path" onclick="setMode('path')" title="Draw Path">Path</button>
+    <button class="tb-btn" id="btn-select" onclick="setMode('select')" title="Select (S / Esc)">Select</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="btn-undo" onclick="undo()" disabled title="Undo (⌘Z)">↩</button>
+    <button class="tb-btn" id="btn-redo" onclick="redo()" disabled title="Redo (⌘⇧Z)">↪</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="btn-snap" onclick="toggleSnap()" title="Snap to Grid (G)">Snap</button>
+    <div class="tb-sep"></div>
+    <div id="tod-wrap">
+      <span id="tod-icon">☀️</span>
+      <input type="range" id="tod-slider" min="0" max="100" value="55" step="1" oninput="setTOD(+this.value)" title="Time of Day">
+      <span id="tod-label">Afternoon</span>
+    </div>
+    <div class="tb-sep"></div>
+    <select class="tb-select" id="ar-sel" onchange="setAR(this.value)" title="Aspect Ratio">
+      <option value="2.39:1" selected>2.39:1</option>
+      <option value="16:9">16:9</option>
+      <option value="1.85:1">1.85:1</option>
+      <option value="4:3">4:3</option>
+      <option value="1:1">1:1</option>
+    </select>
+    <button class="tb-btn" id="btn-thirds" onclick="toggleThirds()" title="Rule of Thirds (T)">Thirds</button>
+    <button class="tb-btn" id="btn-safe" onclick="toggleSafe()" title="Safe Zones (Z)">Safe</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn warn" onclick="deleteSelected()" title="Delete Selected (Del)">Del</button>
+    <button class="tb-btn" onclick="dupeSelected()" title="Duplicate (⌘D)">Dupe</button>
+    <button class="tb-btn" onclick="clearScene()" title="Clear Scene">Clear</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="document.getElementById('import-input').click()" title="Import Scene JSON">Import</button>
+    <button class="tb-btn" onclick="exportScene()" title="Export Scene JSON">Export</button>
+    <button class="tb-btn" onclick="exportPNG()" title="Save Camera Preview (⌘P)">PNG</button>
+    <button class="tb-btn" onclick="showHelp()" title="Keyboard Shortcuts (?)">?</button>
+    <input type="file" id="import-input" accept=".json" onchange="importScene(event)">
+  </div>
+
+  <div id="main">
+    <div id="left-col">
+      <div id="td-wrap">
+        <div class="panel-tag">TOP DOWN</div>
+        <canvas id="top-down"></canvas>
+      </div>
+    </div>
+    <div id="right-col">
+      <div id="preview-wrap">
+        <div class="panel-tag">CAMERA PREVIEW</div>
+        <canvas id="preview"></canvas>
+        <canvas id="overlay-canvas"></canvas>
+        <div id="ar-top"></div>
+        <div id="ar-bot"></div>
+      </div>
+      <div id="shot-bar">
+        <span class="shot-label">SHOTS</span>
+        <span id="shot-chips"></span>
+      </div>
+    </div>
+    <div id="sidebar">
+      <div class="side-head">
+        <span>SCENE</span>
+        <span id="obj-count">0</span>
+      </div>
+      <div id="obj-list"></div>
+      <div id="props">
+        <div id="no-sel">Select an object<br>to edit properties</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusbar">
+    <span id="status-text">Click to place objects.</span>
+    <span class="hint">⌘Z undo · ⌘D dupe · ? help</span>
+  </div>
+
+  <div id="help-overlay">
+    <div id="help-box">
+      <div class="help-title">KEYBOARD SHORTCUTS</div>
+      <div class="help-row"><span>Undo / Redo</span><span class="hk">⌘Z / ⌘⇧Z</span></div>
+      <div class="help-row"><span>Duplicate</span><span class="hk">⌘D</span></div>
+      <div class="help-row"><span>Delete</span><span class="hk">Del / ⌫</span></div>
+      <div class="help-row"><span>Multi-select</span><span class="hk">Shift+click</span></div>
+      <div class="help-row"><span>Place actor / camera / light</span><span class="hk">A / C / L</span></div>
+      <div class="help-row"><span>Select mode</span><span class="hk">S / Esc</span></div>
+      <div class="help-row"><span>Snap to grid</span><span class="hk">G</span></div>
+      <div class="help-row"><span>Rule of thirds</span><span class="hk">T</span></div>
+      <div class="help-row"><span>Safe zones</span><span class="hk">Z</span></div>
+      <div class="help-row"><span>Rotate camera (selected)</span><span class="hk">Scroll</span></div>
+      <div class="help-row"><span>Rotate actor facing (selected)</span><span class="hk">Shift+Scroll</span></div>
+      <div class="help-row"><span>Export PNG</span><span class="hk">⌘P</span></div>
+      <div class="help-row"><span>Finish path / wall</span><span class="hk">Dbl-click / Esc</span></div>
+      <button class="action-btn primary" style="margin-top:12px" onclick="hideHelp()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
